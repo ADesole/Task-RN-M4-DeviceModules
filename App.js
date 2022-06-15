@@ -1,9 +1,45 @@
 import * as React from 'react';
-import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import * as Network from 'expo-network';
+import * as ImagePicker from 'expo-image-picker';
+import { Text, View, StyleSheet, Image, TouchableOpacity,Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import { FileSystemUploadType } from 'expo-file-system';
+import { useState } from "react";
+
 
 export default function App() {
+  const [image, setImage] = useState("https://cdn.sick.com/media/ZOOM/2/82/782/IM0077782.png");
+  const [text, setText] = useState("Pick an image");
+
+
+  
   const handleOcr = async () => {
-    console.log('handleOcr');
+    let result = await ImagePicker.launchImageLibraryAsync();
+    let connected = await Network.getNetworkStateAsync()
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
+    if(!connected.isConnected){
+      Alert.alert(
+        "No internet connection",
+        `Please connect to the internet first`,
+        [
+          { text: "OK", onPress: () => console.log("OK Pressed") }
+        ]
+      );
+    }
+
+    console.log(image+"That was the image")
+    const file = await FileSystem.uploadAsync('http://192.168.1.5:3000/binary-upload',image);
+    console.log(file.body)
+    setText(file.body)
+    Alert.alert(
+      "Done!",
+      `Text extracted from image: ${file.body}`,
+      [
+        { text: "OK", onPress: () => console.log("OK Pressed") }
+      ]
+    );
   };
 
   return (
@@ -17,7 +53,7 @@ export default function App() {
         />
         <View style={styles.text_container}>
           <TouchableOpacity onPress={handleOcr}>
-            <Text style={styles.card_title}>Pick an image</Text>
+            <Text style={styles.card_title}>{text}</Text>
           </TouchableOpacity>
         </View>
       </View>
