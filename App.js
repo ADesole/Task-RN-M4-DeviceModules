@@ -19,6 +19,7 @@ export default function App() {
     if (!result.cancelled) {
       setImage(result.uri);
     }
+    console.log(connected.isConnected)
     if(!connected.isConnected){
       Alert.alert(
         "No internet connection",
@@ -27,10 +28,11 @@ export default function App() {
           { text: "OK", onPress: () => console.log("OK Pressed") }
         ]
       );
+      return
     }
 
     console.log(image+"That was the image")
-    const file = await FileSystem.uploadAsync('http://192.168.1.5:3000/binary-upload',image);
+    const file = await FileSystem.uploadAsync('http://192.168.100.151:3000/binary-upload',image);
     console.log(file.body)
     setText(file.body)
     Alert.alert(
